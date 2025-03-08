@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Festival da Canção Voting</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: linear-gradient(to bottom right, #8B5CF6, #D946EF);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .voting-app {
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #ffcc00;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .song-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+        }
+        .vote-buttons {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 5px;
+        }
+        .vote-button {
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .vote-button:hover {
+            background: linear-gradient(to right, #8B5CF6, #D946EF);
+        }
+        .vote-button.selected {
+            background: linear-gradient(to right, #8B5CF6, #D946EF);
+            cursor: default;
+        }
+        .vote-button.blocked {
+            background-color: #777;
+            cursor: not-allowed;
+            color: #aaa;
+        }
+        .submit-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            background: linear-gradient(to right, #ffcc00, #ff6600);
+            color: black;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .submit-button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        #results {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+        }
+        #results h2 {
+            color: #ffcc00;
+        }
+    </style>
+</head>
+<body>
+    <div class="voting-app">
+        <h1>Festival da Canção Voting</h1>
+        <div id="songs-container"></div>
+        <button id="submit-votes" class="submit-button" onclick="submitVotes()" disabled>Submit Votes</button>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const songs = [
+            "Bombazine – Apago Tudo", "Margarida Campelo – Eu sei que o amor", "HENKA – I Wanna Destroy U", "Bluay – Ninguém", 
+            "Jéssica Pina – Calafrio", "Marco Rodrigues – A minha casa", "NAPA – Deslocado", "Peculiar – Adamastor", 
+            "Fernando Daniel – Medo", "Emmy Curl – Rapsódia da Paz", "JOSH – Tristeza", "Diana Vilarinho – Cotovia"
+        ];
+
+        const votes = Array(12).fill(0);
+
+        function renderSongs() {
+            const container = document.getElementById("songs-container");
+            container.innerHTML = "";
+
+            songs.forEach((song, index) => {
+                const songDiv = document.createElement("div");
+                songDiv.className = "song-section";
+                
+                const label = document.createElement("label");
+                label.textContent = song;
+                songDiv.appendChild(label);
+                
+                const buttonsDiv = document.createElement("div");
+                buttonsDiv.className = "vote-buttons";
+
+                for (let i = 1; i <= 12; i++) {
+                    const button = document.createElement("button");
+                    button.textContent = i;
+                    button.className = "vote-button";
+                    button.onclick = () => handleVote(index, i);
+                    
+                    if (votes[index] === i) {
+                        button.classList.add("selected");
+                    } else if (votes.includes(i)) {
+                        button.classList.add("blocked");
+                        button.disabled = true;
+                    }
+                    
+                    buttonsDiv.appendChild(button);
+                }
+                
+                songDiv.appendChild(buttonsDiv);
+                container.appendChild(songDiv);
+            });
+            document.getElementById("submit-votes").disabled = votes.includes(0);
+        }
+
+        function handleVote(index, value) {
+            if (votes.includes(value)) return;
+            votes[index] = value;
+            renderSongs();
+        }
+
+        function submitVotes() {
+            const resultsDiv = document.getElementById("results");
+            resultsDiv.innerHTML = "<h2>Final Classification</h2>";
+            
+            const rankedSongs = songs.map((song, i) => ({ song, points: votes[i] })).sort((a, b) => b.points - a.points);
+            
+            rankedSongs.forEach((entry, index) => {
+                const p = document.createElement("p");
+                p.textContent = `${index + 1}. ${entry.song} - ${entry.points} points`;
+                resultsDiv.appendChild(p);
+            });
+            
+            resultsDiv.style.display = "block";
+        }
+
+        renderSongs();
+    </script>
+</body>
+</html>
